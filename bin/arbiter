@@ -1,0 +1,69 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'bundler/setup'
+$:.unshift(File.expand_path('../../lib', File.realpath(__FILE__)))
+require 'arbiter'
+
+cmd = ARGV.first
+if cmd == 'start' then
+  if RUBY_ENGINE == 'ruby' and !ENV['RUBY_THREAD_MACHINE_STACK_SIZE'] then
+    ENV['RUBY_THREAD_MACHINE_STACK_SIZE'] = '1572864'
+    exec('ruby', $0, *ARGV)
+  end
+  Arbiter.new.run
+  exit
+elsif cmd == 'check' then
+  scripts_path = ENV['SCRIPTS_PATH'] || '/etc/arbiter.d'
+  healthy = true
+  message = ''
+  Dir.entries(scripts_path).each do |fn|
+    fp = "#{scripts_path}/#{fn}"
+    next unless File.file?(fp) and File.executable?(fp)
+    Timeout.timeout(5) do
+      system(fp)
+      status = $?.exitstatus
+      if status > 0 then
+        healthy = false
+        message = "#{fn} exited with status=#{status.inspect}"
+        break
+      end
+    end
+  end
+
+  sock = UNIXSocket.new(ENV['SOCKET_PATH'] || '/var/run/arbiter.sock')
+  sock.write("set #{healthy ? 'healthy' : 'unhealthy'} #{message}\n")
+  $stdout.puts sock.readline
+
+  exit 0 if healthy
+  exit 1
+elsif cmd == 'shlock' then
+  sock = UNIXSocket.new(ENV['SOCKET_PATH'] || '/var/run/arbiter.sock')
+  sock.write("lock pid=#{$$}\n")
+  result = sock.readline.chomp
+  if result == 'true' then
+    system(ENV['SHELL'] || '/bin/sh', '-l', *ARGV[1..-1])
+    sock.close
+    system('ruby', $0, 'check')
+    exit 0
+  else
+    $stderr.puts "Failed to obtain lock"
+    exit 1
+  end
+elsif !cmd.nil? then
+  sock = UNIXSocket.new(ENV['SOCKET_PATH'] || '/var/run/arbiter.sock')
+  sock.write(ARGV.join(' ') + "\n")
+  $stdout.puts sock.readline
+else
+  sock = UNIXSocket.new(ENV['SOCKET_PATH'] || '/var/run/arbiter.sock')
+  loop do
+    buf = ''
+    ios = select([$stdin,sock])
+    ios.first.each do |io|
+      if io == $stdin then
+        sock.write $stdin.read_nonblock(4096)
+      else
+        $stdout.write sock.read_nonblock(4096)
+      end
+    end
+  end
+end
