@@ -1,0 +1,12 @@
+description "Cluster change arbitration manager"
+
+start on started corosync
+stop on stopping corosync
+
+env RUBY_THREAD_MACHINE_STACK_SIZE=1572864
+
+exec <%= app_dir %>/bin/foreman run -d <%= app_dir %> -- arbiter start
+
+respawn
+
+# vim: set ft=upstart ts=2 sw=2 tw=0 :
