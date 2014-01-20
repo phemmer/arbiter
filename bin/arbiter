@@ -40,17 +40,36 @@ elsif cmd == 'check' then
   exit 1
 elsif cmd == 'shlock' then
   sock = UNIXSocket.new(ENV['SOCKET_PATH'] || '/var/run/arbiter.sock')
-  sock.write("lock pid=#{$$}\n")
-  result = sock.readline.chomp
-  if result == 'true' then
-    system(ENV['SHELL'] || '/bin/sh', '-l', *ARGV[1..-1])
-    sock.close
-    system('ruby', $0, 'check')
-    exit 0
-  else
-    $stderr.puts "Failed to obtain lock"
-    exit 1
+
+  require 'timeout'
+
+  begin
+    Timeout.timeout(15 * 60) do
+      sock.write("lock pid=#{$$}\n")
+      result = sock.readline.chomp
+      pending = false
+      while result == 'false' do
+        if !pending then
+          pending = true
+          $stderr.puts "Waiting for lock"
+        end
+        sock.write("status\n")
+        $stderr.puts sock.readline.chomp
+        sleep 2
+        sock.write("lock pid=#{$$}\n")
+        result = sock.readline.chomp
+      end
+    end
+  rescue Timeout::Error => e
+    abort 'Timeout while waiting for lock'
   end
+
+  Bundler.with_clean_env do
+    system(ENV['SHELL'] || '/bin/sh', '-l', *ARGV[1..-1])
+  end
+  sock.close
+  system('ruby', $0, 'check')
+  exit 0
 elsif !cmd.nil? then
   sock = UNIXSocket.new(ENV['SOCKET_PATH'] || '/var/run/arbiter.sock')
   sock.write(ARGV.join(' ') + "\n")
