@@ -16,16 +16,18 @@ elsif cmd == 'check' then
   scripts_path = ENV['SCRIPTS_PATH'] || '/etc/arbiter.d'
   healthy = true
   message = ''
-  Dir.entries(scripts_path).each do |fn|
-    fp = "#{scripts_path}/#{fn}"
-    next unless File.file?(fp) and File.executable?(fp)
-    Timeout.timeout(5) do
-      system(fp)
-      status = $?.exitstatus
-      if status > 0 then
-        healthy = false
-        message = "#{fn} exited with status=#{status.inspect}"
-        break
+  Bundler.with_clean_env do
+    Dir.entries(scripts_path).each do |fn|
+      fp = "#{scripts_path}/#{fn}"
+      next unless File.file?(fp) and File.executable?(fp)
+      Timeout.timeout(5) do
+        system(fp)
+        status = $?.exitstatus
+        if status > 0 then
+          healthy = false
+          message = "#{fn} exited with status=#{status.inspect}"
+          break
+        end
       end
     end
   end
