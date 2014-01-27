@@ -7,6 +7,8 @@ env RUBY_THREAD_MACHINE_STACK_SIZE=1572864
 
 exec <%= app_dir %>/bin/foreman run -d <%= app_dir %> -- arbiter start
 
+post-stop exec rm /var/run/arbiter.sock
+
 respawn
 
 # vim: set ft=upstart ts=2 sw=2 tw=0 :
