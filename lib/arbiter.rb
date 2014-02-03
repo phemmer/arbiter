@@ -10,6 +10,16 @@ class Arbiter
 		end
 	end
 	def initialize()
+		sock_path = ENV['SOCKET_PATH'] || '/var/run/arbiter.sock'
+		if File.exists?(sock_path)
+			begin
+				sock = UNIXSocket.new(sock_path)
+				abort "There is another process using #{sock_path}!"
+			rescue => e
+				File.unlink(sock_path)
+			end
+		end
+
 		@status = {}
 		@status_mutex = Mutex.new
 
@@ -29,7 +39,6 @@ class Arbiter
 
 		@cc.join('arbiter')
 
-		sock_path = ENV['SOCKET_PATH'] || '/var/run/arbiter.sock'
 		@server = UNIXServer.open(sock_path)
 		@client_bufs = {}
 		@client_locks = {}
