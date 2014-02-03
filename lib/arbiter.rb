@@ -61,10 +61,12 @@ class Arbiter
 						client_cmd(sock.fileno, 'unlock')
 						client_socks.delete(sock)
 						@client_bufs.delete(sock.fileno)
+						sock.close if !sock.closed?
 					rescue EOFError => e # client has disconnected
 						client_cmd(sock.fileno, 'unlock')
 						client_socks.delete(sock)
 						@client_bufs.delete(sock.fileno)
+						sock.close if !sock.closed?
 					end
 				end
 			end
