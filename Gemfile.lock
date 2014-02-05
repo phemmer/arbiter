@@ -8,7 +8,7 @@ GIT
 
 GIT
   remote: git@github.com:phemmer/ruby-corosync.git
-  revision: 86e5b606809ad8d6d6813cec4dba13bd00689f6a
+  revision: b0558ea431d90172c1437f374873b6c8c7d182e8
   ref: phemmer
   specs:
     corosync (0.0.3)
