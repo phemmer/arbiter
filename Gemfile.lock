@@ -15,6 +15,13 @@ GIT
       ffi (~> 1.9)
 
 GIT
+  remote: git@github.com:phemmer/ruby-docker-remote.git
+  revision: ea9b560e9ee1f867ae4cf4bf20d6260012ff2e65
+  specs:
+    docker-remote (0.0.1)
+      httpclient (~> 2.3.4.1)
+
+GIT
   remote: git@github.com:pub-burrito/foreman.git
   revision: bf2db433aa700d2d1ac931e65ee83743163920d0
   branch: cloudcom
@@ -29,6 +36,7 @@ GEM
     diff-lcs (1.2.5)
     dotenv (0.9.0)
     ffi (1.9.3)
+    httpclient (2.3.4.1)
     json (1.8.1)
     rake (10.1.1)
     rdoc (4.1.1)
@@ -50,6 +58,7 @@ PLATFORMS
 DEPENDENCIES
   corosync!
   corosync-commander!
+  docker-remote!
   foreman!
   rake
   rdoc

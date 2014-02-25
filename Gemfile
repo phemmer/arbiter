@@ -6,6 +6,7 @@ gem 'corosync', :git => 'git@github.com:phemmer/ruby-corosync.git', :ref => 'phe
 #gem 'corosync-commander', :git => 'git@github.com:phemmer/ruby-corosync-commander.git'
 gem 'corosync-commander', :git => 'git@github.com:phemmer/ruby-corosync-commander.git', :ref => 'phemmer'
 #gem 'corosync-commander', :path => '/home/phemmer/git/corosync-commander'
+gem 'docker-remote', :git => 'git@github.com:phemmer/ruby-docker-remote.git'
 
 gem 'foreman', :git => 'git@github.com:pub-burrito/foreman.git', :branch => 'cloudcom'
 

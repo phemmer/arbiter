@@ -2,6 +2,11 @@ require 'rubygems'
 require 'bundler/setup'
 require 'rake'
 
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new(:spec)
+
+###
+
 desc "Generate upstart service file"
 task "upstart" do
   run_dir = ENV['run_dir'] || '/tmp'

@@ -3,6 +3,8 @@ require 'rubygems'
 require 'bundler/setup'
 $:.unshift(File.expand_path('../../lib', File.realpath(__FILE__)))
 require 'arbiter'
+require 'json'
+require 'yaml'
 
 cmd = ARGV.first
 if cmd == 'start' then
@@ -73,7 +75,7 @@ elsif cmd == 'shlock' then
 elsif !cmd.nil? then
   sock = UNIXSocket.new(ENV['SOCKET_PATH'] || '/var/run/arbiter.sock')
   sock.write(ARGV.join(' ') + "\n")
-  $stdout.puts sock.readline
+  $stdout.puts JSON.parse(sock.readline).to_yaml
 else
   sock = UNIXSocket.new(ENV['SOCKET_PATH'] || '/var/run/arbiter.sock')
   loop do

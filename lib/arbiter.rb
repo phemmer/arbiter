@@ -3,6 +3,7 @@ class Arbiter
 	require 'corosync/cmap'
 	require 'socket'
 	require 'shellwords'
+	require 'json'
 
 	def self.finalizer(sockpath)
 		proc do
@@ -117,7 +118,7 @@ class Arbiter
 					end
 				end
 			end
-			status.inspect #TODO
+			status.to_json
 		elsif cmd == 'set' || cmd == 'update' then
 			@cc.execute([], 'update', args.shift, args.join(' '), Time.new.to_i)
 			nil
