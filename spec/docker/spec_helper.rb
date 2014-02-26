@@ -3,7 +3,6 @@ RSpec.configure do |config|
   config.formatter = :documentation
 end
 
-$:.unshift('/home/phemmer/git/docker-remote/lib')
 require 'docker'
 $docker = Docker.new
 $docker.container_auto_remove = true
@@ -158,12 +157,16 @@ class SDockerContainer
 		end
 	end
 
+	attr_reader :data # Hash for storing arbitrary information about the container
+
 	def initialize(cmd, version = nil)
 		@@containers ||= {}
 		unless ENV['debug'] then
 			stderr_fd = $stderr.fcntl(Fcntl::F_DUPFD)
 			File.open('/dev/null','w') {|fh| $stderr.reopen(fh)}
 		end
+
+		@data = {}
 
 		@container = $docker.containers.create(
 			'Image' => SDockerImage.id,
@@ -188,9 +191,6 @@ class SDockerContainer
 
 		puts "Installing package"
 		cmd("bundle install --local")
-
-		puts "Executing #{cmd}"
-		cmd("#{cmd} >/tmp/log 2>&1 &")
 
 		puts "Build complete"
 		if stderr_fd then
@@ -219,6 +219,10 @@ class SDockerContainer
 	def cmd(*args)
 		cmd_string = "cd /#{SDockerImage::PROJECT_NAME}; " + (args.size > 1 ? Shellwords.shelljoin(args) : args[0])
 		%x{#{Shellwords.shelljoin(sshcmd(cmd_string))}}
+	end
+	def cmd_background(*args)
+		cmd_string = args.size > 1 ? Shellwords.shelljoin(args) : args[0]
+		cmd(cmd_string + '>>/tmp/log 2>&1 & echo $!').chomp.to_i
 	end
 end
 
