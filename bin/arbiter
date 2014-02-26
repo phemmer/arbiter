@@ -73,7 +73,12 @@ elsif cmd == 'shlock' then
   system('ruby', $0, 'check')
   exit 0
 elsif !cmd.nil? then
-  sock = UNIXSocket.new(ENV['SOCKET_PATH'] || '/var/run/arbiter.sock')
+  sock = nil
+  begin
+    sock = UNIXSocket.new(ENV['SOCKET_PATH'] || '/var/run/arbiter.sock')
+  rescue Errno::ENOENT, Errno::ECONNREFUSED => e
+    abort "Arbiter daemon is not running"
+  end
   sock.write(ARGV.join(' ') + "\n")
   $stdout.puts JSON.parse(sock.readline).to_yaml
 else
