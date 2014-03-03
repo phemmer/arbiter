@@ -15,4 +15,6 @@ group :development do
   gem 'yard'
   gem 'rdoc'
   gem 'rspec'
+  gem 'pry'
+  gem 'byebug'
 end

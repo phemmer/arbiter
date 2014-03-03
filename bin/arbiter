@@ -5,6 +5,7 @@ $:.unshift(File.expand_path('../../lib', File.realpath(__FILE__)))
 require 'arbiter'
 require 'json'
 require 'yaml'
+require 'shellwords'
 
 cmd = ARGV.first
 if cmd == 'start' then
@@ -36,7 +37,8 @@ elsif cmd == 'check' then
 
   sock = UNIXSocket.new(ENV['SOCKET_PATH'] || '/var/run/arbiter.sock')
   sock.write("set #{healthy ? 'healthy' : 'unhealthy'} #{message}\n")
-  $stdout.puts sock.readline
+  output = sock.readline
+  $stdout.puts if output[0] != "\n"
 
   exit 0 if healthy
   exit 1
@@ -45,11 +47,26 @@ elsif cmd == 'shlock' then
 
   require 'timeout'
 
+  args = ARGV[1..-1]
+  if args.size > 0 and args[0].match(/^--wait=([\d\.]+)$/) then
+    #TODO we need a real agument parser
+    wait = $1.to_f
+    args.shift
+  else
+    wait = 15 * 60
+  end
+
+  timeout = wait == 0 ? 60 : wait
   begin
-    Timeout.timeout(15 * 60) do
+    Timeout.timeout(timeout) do
       sock.write("lock pid=#{$$}\n")
       result = sock.readline.chomp
       pending = false
+
+      if result == 'false' and wait == 0 then
+        raise Timeout::Error
+      end
+
       while result == 'false' do
         if !pending then
           pending = true
@@ -67,11 +84,27 @@ elsif cmd == 'shlock' then
   end
 
   Bundler.with_clean_env do
-    system(ENV['SHELL'] || '/bin/sh', '-l', *ARGV[1..-1])
+    if args.size > 0 then
+      if args.size == 1 and args.first.match(' ') then
+        # looks to be a single argument that should be evaluated
+        shargs = ['-c', args[0]]
+      else
+        # looks to be a command and arguments
+        shargs = ['-c', Shellwords.shelljoin(args)]
+      end
+    else
+      # no arguments, go interactive
+      shargs = []
+    end
+    system(ENV['SHELL'] || '/bin/sh', *shargs)
   end
+  status = $?.exitstatus
+
   sock.close
+
   system('ruby', $0, 'check')
-  exit 0
+
+  exit status
 elsif !cmd.nil? then
   sock = nil
   begin
