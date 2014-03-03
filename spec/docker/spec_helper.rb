@@ -1,6 +1,7 @@
 RSpec.configure do |config|
   config.color_enabled = true
   config.formatter = :documentation
+	config.order = :random
 end
 
 require 'docker'
@@ -38,7 +39,7 @@ module SDockerImage
 # core
 set -x
 apt-get update
-apt-get install -y ssh
+apt-get install -y ssh iptables
 mkdir /var/run/sshd
 mkdir /root/.ssh
 chmod 600 root/.ssh
