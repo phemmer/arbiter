@@ -96,7 +96,9 @@ elsif cmd == 'shlock' then
       # no arguments, go interactive
       shargs = []
     end
-    system(ENV['SHELL'] || '/bin/sh', *shargs)
+    Bundler.with_clean_env do
+      system(ENV['SHELL'] || '/bin/sh', *shargs)
+    end
   end
   status = $?.exitstatus
 
