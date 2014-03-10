@@ -34,7 +34,7 @@ class Arbiter
 		@cc.commands.register 'update', &self.method(:cc_update)
 		@cc.on_confchg &self.method(:cc_confchg)
 
-		@cmap = Corosync::CMap.new(true)
+		@cmap = Corosync::CMAP.new(true)
 
 		@healthy_threshold_percent = (ENV['HEALTHY_THRESHOLD_PERCENT'] || 50).to_i
 
@@ -90,7 +90,7 @@ class Arbiter
 		if cmd == 'lock' then
 			return false if @client_locks.has_key?(client_id) # already locked
 
-			lock_id, sender = @cc.execute([], 'lock request', args.join(' ')).to_enum(Exception).find{|lock_id, sender| !lock_id.nil?}
+			lock_id, sender = @cc.execute([], 'lock request', args.join(' ')).to_enum(Exception).find{|sender, lock_id| !lock_id.nil?}
 			if lock_id then
 				@client_locks[client_id] = lock_id
 				return true
