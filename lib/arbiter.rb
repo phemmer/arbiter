@@ -90,7 +90,7 @@ class Arbiter
 		if cmd == 'lock' then
 			return false if @client_locks.has_key?(client_id) # already locked
 
-			lock_id, sender = @cc.execute([], 'lock request', args.join(' ')).to_enum(Exception).find{|sender, lock_id| !lock_id.nil?}
+			sender, lock_id = @cc.execute([], 'lock request', args.join(' ')).to_enum(Exception).find{|sender, lock_id| !lock_id.nil?}
 			if lock_id then
 				@client_locks[client_id] = lock_id
 				return true
