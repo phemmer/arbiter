@@ -1,4 +1,18 @@
 GIT
+  remote: git@github.com:phemmer/ruby-corosync-commander.git
+  revision: c3914414072ee41e88b6ad9b013a9825892a058f
+  specs:
+    corosync-commander (0.1.0.0)
+      corosync (~> 0.1.0)
+
+GIT
+  remote: git@github.com:phemmer/ruby-corosync.git
+  revision: 27c3addf01073e5fa798f4df52bb36ebdcc6c07c
+  specs:
+    corosync (0.1.0.0)
+      ffi (~> 1.9)
+
+GIT
   remote: git@github.com:phemmer/ruby-docker-remote.git
   revision: ea9b560e9ee1f867ae4cf4bf20d6260012ff2e65
   specs:
@@ -22,10 +36,6 @@ GEM
       debugger-linecache (~> 1.2.0)
     coderay (1.1.0)
     columnize (0.3.6)
-    corosync (0.1.0.0)
-      ffi (~> 1.9)
-    corosync-commander (0.1.0.0)
-      corosync (~> 0.1.0)
     debugger-linecache (1.2.0)
     diff-lcs (1.2.5)
     dotenv (0.9.0)
@@ -57,7 +67,8 @@ PLATFORMS
 
 DEPENDENCIES
   byebug
-  corosync-commander (~> 0.1.0)
+  corosync!
+  corosync-commander!
   docker-remote!
   foreman!
   pry

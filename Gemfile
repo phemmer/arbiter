@@ -1,6 +1,7 @@
 source "https://rubygems.org"
 
-gem 'corosync-commander', '~>0.1.0'
+gem 'corosync', :git => 'git@github.com:phemmer/ruby-corosync.git'
+gem 'corosync-commander', :git => 'git@github.com:phemmer/ruby-corosync-commander.git'
 
 group :development do
   gem 'foreman', :git => 'git@github.com:pub-burrito/foreman.git', :branch => 'cloudcom'
